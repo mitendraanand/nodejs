@@ -74,25 +74,25 @@ const writeFilePro = (file, data) => {
 
 // ASYNC and AWAIT from ES8 uses the PROMISE in even more cleaner way
 // JUST a SYNTAXTICAL SUGAR
-const getDogPic = async () => {
-  try {
-    const data = await readFilePro(`${__dirname}/dog.txt`); // No need of then, await does the trick
-    console.log(`Breed: ${data}`);
+// const getDogPic = async () => {
+//   try {
+//     const data = await readFilePro(`${__dirname}/dog.txt`); // No need of then, await does the trick
+//     console.log(`Breed: ${data}`);
 
-    const res = await superagent.get(
-      `https://dog.ceo/api/breed/${data}/images/random`
-    );
-    console.log(res.body);
+//     const res = await superagent.get(
+//       `https://dog.ceo/api/breed/${data}/images/random`
+//     );
+//     console.log(res.body);
 
-    await writeFilePro('dog-img.txt', res.body.message);
-    console.log('Random dog image saved to file.');
-  } catch (err) {
-    console.log('ERROR!');
-    throw err;
-  }
+//     await writeFilePro('dog-img.txt', res.body.message);
+//     console.log('Random dog image saved to file.');
+//   } catch (err) {
+//     console.log('ERROR!');
+//     throw err;
+//   }
 
-  return 'READY';
-};
+//   return 'READY';
+// };
 
 // Option 1: Call and collect the return value as Promises
 // getDogPic()
@@ -105,6 +105,47 @@ const getDogPic = async () => {
 
 // Option 2: ASYNC/AWAIT using Immediate Invoked Funciton (IIFE)
 // This helps in NOT declaring a new function and then having to call the same.
+// (async () => {
+//   try {
+//     const result = await getDogPic();
+//     console.log(result);
+//   } catch (err) {
+//     console.log('getDogPic catch ERROR!');
+//   }
+// })();
+
+// ASYNC function returns PROMISE and the return PROMISE is in RESOLVED state if there was no error otherwise
+// the same will be in REJECTED state. PROMISE is in PENDING state at the time of creation.
+
+// HOW TO CALL MULTIPLE PROMISES AT THE SAME TIME and not call 1 by 1.
+const getDogPic = async () => {
+  try {
+    const data = await readFilePro(`${__dirname}/dog.txt`); // No need of then, await does the trick
+    console.log(`Breed: ${data}`);
+
+    const res1Pro = superagent.get(
+      `https://dog.ceo/api/breed/${data}/images/random`
+    );
+    const res2Pro = superagent.get(
+      `https://dog.ceo/api/breed/${data}/images/random`
+    );
+    const res3Pro = superagent.get(
+      `https://dog.ceo/api/breed/${data}/images/random`
+    );
+    const all = await Promise.all([res1Pro, res2Pro, res3Pro]);
+    const imgs = all.map(el => el.body.message);
+    console.log(imgs);
+
+    await writeFilePro('dog-img.txt', imgs.join('\n'));
+    console.log('Random dog image saved to file.');
+  } catch (err) {
+    console.log('ERROR!');
+    throw err;
+  }
+
+  return 'READY';
+};
+
 (async () => {
   try {
     const result = await getDogPic();
@@ -113,6 +154,3 @@ const getDogPic = async () => {
     console.log('getDogPic catch ERROR!');
   }
 })();
-
-// ASYNC function returns PROMISE and the return PROMISE is in RESOLVED state if there was no error otherwise
-// the same will be in REJECTED state. PROMISE is in PENDING state at the time of creation.
