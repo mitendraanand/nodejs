@@ -87,8 +87,32 @@ const getDogPic = async () => {
     await writeFilePro('dog-img.txt', res.body.message);
     console.log('Random dog image saved to file.');
   } catch (err) {
-    console.log(err);
+    console.log('ERROR!');
+    throw err;
   }
+
+  return 'READY';
 };
 
-getDogPic();
+// Option 1: Call and collect the return value as Promises
+// getDogPic()
+//   .then(x => {
+//     console.log(x);
+//   })
+//   .catch(err => {
+//     console.log('getDogPic catch ERROR!');
+//   });
+
+// Option 2: ASYNC/AWAIT using Immediate Invoked Funciton (IIFE)
+// This helps in NOT declaring a new function and then having to call the same.
+(async () => {
+  try {
+    const result = await getDogPic();
+    console.log(result);
+  } catch (err) {
+    console.log('getDogPic catch ERROR!');
+  }
+})();
+
+// ASYNC function returns PROMISE and the return PROMISE is in RESOLVED state if there was no error otherwise
+// the same will be in REJECTED state. PROMISE is in PENDING state at the time of creation.
