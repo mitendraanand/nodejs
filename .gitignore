@@ -639,3 +639,11 @@
 1-node-farm/src/node_modules/yallist/package.json
 1-node-farm/src/node_modules/yallist/README.md
 1-node-farm/src/node_modules/yallist/yallist.js
+2-how-node-works/final/event-loop.js
+2-how-node-works/final/events.js
+2-how-node-works/final/modules.js
+2-how-node-works/final/streams.js
+2-how-node-works/final/test-file.txt
+2-how-node-works/final/test-module-1.js
+2-how-node-works/final/test-module-2.js
+2-how-node-works/final/test-module-3.js
