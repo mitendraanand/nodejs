@@ -1,0 +1,15 @@
+1-node-farm/final/.prettierrc
+1-node-farm/final/index.js
+1-node-farm/final/package-lock.json
+1-node-farm/final/package.json
+1-node-farm/final/dev-data/data.json
+1-node-farm/final/modules/replaceTemplate.js
+1-node-farm/final/templates/template-card.html
+1-node-farm/final/templates/template-overview.html
+1-node-farm/final/templates/template-product.html
+1-node-farm/final/txt/append.txt
+1-node-farm/final/txt/final.txt
+1-node-farm/final/txt/input.txt
+1-node-farm/final/txt/output.txt
+1-node-farm/final/txt/read-this.txt
+1-node-farm/final/txt/start.txt
