@@ -21,7 +21,7 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
-app.get('/api/v1/tours', (req, res) => {
+const getAllTours = (req, res) => {
   res.status(200).json({
     status: 'success',
     results: tours.length,
@@ -29,9 +29,28 @@ app.get('/api/v1/tours', (req, res) => {
       tours // From ES6 if key and value name is same then we need write key-value pair.
     }
   });
-});
+};
 
-app.post('/api/v1/tours', (req, res) => {
+const getTour = (req, res) => {
+  console.log(req.params);
+
+  const id = req.params.id * 1; // JS trick to convert string to integer.
+  // find takes a callback wchich runs the equality check on each element of the array
+  const tour = tours.find(el => el.id === id);
+  if (!tour) {
+    return res.status(404).json({ status: 'fail', message: 'invalid id' });
+  }
+
+  res.status(200).json({
+    status: 'success',
+    results: 1,
+    data: {
+      tour // From ES6 if key and value name is same then we need write key-value pair.
+    }
+  });
+};
+
+const createTour = (req, res) => {
   //console.log(req.body);
 
   const newId = tours[tours.length - 1].id + 1;
@@ -50,29 +69,9 @@ app.post('/api/v1/tours', (req, res) => {
       }); // 201 = crated new resource
     }
   );
-});
+};
 
-// '/api/v1/tours/:id/:x/:y?' there can be multiple params, the ones with ? are optionals
-app.get('/api/v1/tours/:id', (req, res) => {
-  console.log(req.params);
-
-  const id = req.params.id * 1; // JS trick to convert string to integer.
-  // find takes a callback wchich runs the equality check on each element of the array
-  const tour = tours.find(el => el.id === id);
-  if (!tour) {
-    return res.status(404).json({ status: 'fail', message: 'invalid id' });
-  }
-
-  res.status(200).json({
-    status: 'success',
-    results: 1,
-    data: {
-      tour // From ES6 if key and value name is same then we need write key-value pair.
-    }
-  });
-});
-
-app.patch('/api/v1/tours/:id', (req, res) => {
+const updateTour = (req, res) => {
   // not doing the code as it's simple java script stuff to read the json file and update.
   // simply sendign the response.
   const id = req.params.id * 1; // JS trick to convert string to integer.
@@ -85,9 +84,9 @@ app.patch('/api/v1/tours/:id', (req, res) => {
   res
     .status(200)
     .json({ status: 'success', data: { tour: '<updated the tour...>' } });
-});
+};
 
-app.delete('/api/v1/tours/:id', (req, res) => {
+const deleteTour = (req, res) => {
   // not doing the code as it's simple java script stuff to read the json file and update.
   // simply sendign the response.
   const id = req.params.id * 1; // JS trick to convert string to integer.
@@ -97,10 +96,25 @@ app.delete('/api/v1/tours/:id', (req, res) => {
     return res.status(404).json({ status: 'fail', message: 'invalid id' });
   }
 
-  res
-    .status(204)
-    .json({ status: 'success', data: null });
-});
+  res.status(204).json({ status: 'success', data: null });
+};
+
+// app.get('/api/v1/tours', getAllTours);
+// app.get('/api/v1/tours/:id', getTour); // '/api/v1/tours/:id/:x/:y?' there can be multiple params, the ones with ? are optionals
+// app.post('/api/v1/tours', createTour);
+// app.patch('/api/v1/tours/:id', updateTour);
+// app.delete('/api/v1/tours/:id', deleteTour);
+
+app
+  .route('/api/v1/tours')
+  .get(getAllTours)
+  .post(createTour);
+
+app
+  .route('/api/v1/tours/:id')
+  .get(getTour)
+  .patch(updateTour)
+  .delete(deleteTour);
 
 const port = 3000;
 app.listen(port, () => {
