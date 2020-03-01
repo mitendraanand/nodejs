@@ -12,6 +12,15 @@ exports.checkID = (req, res, next, val) => {
   next();
 };
 
+// MIDDLEWARE to check the request body for validate data to create tour.
+exports.checkBody = (req, res, next) => {
+  //console.log(`from checkBody: ${JSON.stringify(req.body)}`);
+  if ( !(req.body.name && req.body.price) ) {
+    return res.status(404).json({ status: 'fail', message: 'invalid data' });
+  }
+  next();
+};
+
 // ROUTE HANDLERS
 exports.getAllTours = (req, res) => {
   res.status(200).json({

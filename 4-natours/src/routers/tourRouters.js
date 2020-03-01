@@ -10,7 +10,7 @@ router.param('id', tourController.checkID); // Another middle ware to look into 
 router
   .route('/')
   .get(tourController.getAllTours)
-  .post(tourController.createTour);
+  .post(tourController.checkBody, tourController.createTour); // Controller chaining...
 
 router
   .route('/:id')
