@@ -72,6 +72,36 @@ app.get('/api/v1/tours/:id', (req, res) => {
   });
 });
 
+app.patch('/api/v1/tours/:id', (req, res) => {
+  // not doing the code as it's simple java script stuff to read the json file and update.
+  // simply sendign the response.
+  const id = req.params.id * 1; // JS trick to convert string to integer.
+  // find takes a callback wchich runs the equality check on each element of the array
+  const tour = tours.find(el => el.id === id);
+  if (!tour) {
+    return res.status(404).json({ status: 'fail', message: 'invalid id' });
+  }
+
+  res
+    .status(200)
+    .json({ status: 'success', data: { tour: '<updated the tour...>' } });
+});
+
+app.delete('/api/v1/tours/:id', (req, res) => {
+  // not doing the code as it's simple java script stuff to read the json file and update.
+  // simply sendign the response.
+  const id = req.params.id * 1; // JS trick to convert string to integer.
+  // find takes a callback wchich runs the equality check on each element of the array
+  const tour = tours.find(el => el.id === id);
+  if (!tour) {
+    return res.status(404).json({ status: 'fail', message: 'invalid id' });
+  }
+
+  res
+    .status(204)
+    .json({ status: 'success', data: null });
+});
+
 const port = 3000;
 app.listen(port, () => {
   console.log(`App running on ${port}...`);
