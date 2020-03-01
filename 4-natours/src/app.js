@@ -10,8 +10,13 @@ const app = express();
 // MIDDLEWARES
 // Include a simple middleware so that POST request object has the data from client.
 // Middleware is just a function that modify the incoming data
-app.use(morgan('dev')); // Logs info about HTTP requests e.g. GET /api/v1/tours/10 200 8.949 ms - 111
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev')); // Logs info about HTTP requests e.g. GET /api/v1/tours/10 200 8.949 ms - 111
+}
+
 app.use(express.json());
+app.use(express.static(`${__dirname}/public`)); // MIDDLEWARE to allow to serve static html/img/etc files.
+
 app.use((req, res, next) => {
   console.log('Hello from middleware');
   next();
