@@ -45,11 +45,11 @@ const getAllTours = (req, res) => {
 };
 
 const getAllUsers = (req, res) => {
-    res.status(500).json({
-        status: 'error',
-        message: 'This route is not implemented'
-    })
-}
+  res.status(500).json({
+    status: 'error',
+    message: 'This route is not implemented'
+  });
+};
 
 const createUser = (req, res) => {
   res.status(500).json({
@@ -79,8 +79,6 @@ const deleteUser = (req, res) => {
   });
 };
 
-
-// 3) ROUTES
 const getTour = (req, res) => {
   console.log(req.params);
 
@@ -149,30 +147,39 @@ const deleteTour = (req, res) => {
   res.status(204).json({ status: 'success', data: null });
 };
 
+// 3) ROUTES
+
 // app.get('/api/v1/tours', getAllTours);
 // app.get('/api/v1/tours/:id', getTour); // '/api/v1/tours/:id/:x/:y?' there can be multiple params, the ones with ? are optionals
 // app.post('/api/v1/tours', createTour);
 // app.patch('/api/v1/tours/:id', updateTour);
 // app.delete('/api/v1/tours/:id', deleteTour);
 
-app
-  .route('/api/v1/tours')
+const tourRouter = express.Router(); // A sub App for Tours resources
+app.use('/api/v1/tours', tourRouter); // Mounting the router
+
+tourRouter
+  .route('/')
   .get(getAllTours)
   .post(createTour);
 
-app
-  .route('/api/v1/tours/:id')
+tourRouter
+  .route('/:id')
   .get(getTour)
   .patch(updateTour)
   .delete(deleteTour);
 
-app
-  .route('/api/v1/users')
+
+const userRouter = express.Router(); // A sub App for Users resources
+app.use('/api/v1/users', userRouter);  // Mounting the router
+
+userRouter
+  .route('/')
   .get(getAllUsers)
   .post(createUser);
 
-app
-  .route('/api/v1/users/:id')
+userRouter
+  .route('/:id')
   .get(getUser)
   .patch(updateUser)
   .delete(deleteUser);
