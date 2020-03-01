@@ -1,8 +1,16 @@
-const fs = require('fs')
+const fs = require('fs');
 
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 );
+
+// MIDDLEWARE to handle the validations of id, if sent
+exports.checkID = (req, res, next, val) => {
+  if (req.params.id * 1 > tours.length) {
+    return res.status(404).json({ status: 'fail', message: 'invalid id' });
+  }
+  next();
+};
 
 // ROUTE HANDLERS
 exports.getAllTours = (req, res) => {
@@ -19,12 +27,9 @@ exports.getAllTours = (req, res) => {
 exports.getTour = (req, res) => {
   console.log(req.params);
 
-  const id = req.params.id * 1; // JS trick to convert string to integer.
+  id = req.params.id * 1; //JS trick to conver string to number
   // find takes a callback wchich runs the equality check on each element of the array
   const tour = tours.find(el => el.id === id);
-  if (!tour) {
-    return res.status(404).json({ status: 'fail', message: 'invalid id' });
-  }
 
   res.status(200).json({
     status: 'success',
@@ -59,12 +64,6 @@ exports.createTour = (req, res) => {
 exports.updateTour = (req, res) => {
   // not doing the code as it's simple java script stuff to read the json file and update.
   // simply sendign the response.
-  const id = req.params.id * 1; // JS trick to convert string to integer.
-  // find takes a callback wchich runs the equality check on each element of the array
-  const tour = tours.find(el => el.id === id);
-  if (!tour) {
-    return res.status(404).json({ status: 'fail', message: 'invalid id' });
-  }
 
   res
     .status(200)
@@ -74,12 +73,6 @@ exports.updateTour = (req, res) => {
 exports.deleteTour = (req, res) => {
   // not doing the code as it's simple java script stuff to read the json file and update.
   // simply sendign the response.
-  const id = req.params.id * 1; // JS trick to convert string to integer.
-  // find takes a callback wchich runs the equality check on each element of the array
-  const tour = tours.find(el => el.id === id);
-  if (!tour) {
-    return res.status(404).json({ status: 'fail', message: 'invalid id' });
-  }
 
   res.status(204).json({ status: 'success', data: null });
 };
