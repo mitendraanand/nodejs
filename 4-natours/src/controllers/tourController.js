@@ -55,7 +55,7 @@ exports.createTour = async (req, res) => {
     console.log(`ERROR: ${err}`);
     res.status(400).json({
       status: 'fail',
-      message: 'Invalid data sent!'
+      message: err
     });
   }
 };
