@@ -6,17 +6,25 @@ const Tour = require('./../models/tourModel');
 exports.getAllTours = async (req, res) => {
   try {
     // BUILD QUERY
-    // 1) Filtering
+    // 1A) Filtering
     const queryObj = { ...req.query }; // ES 6 trick of creating deep copy of object for modification.
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
 
     excludedFields.forEach(el => delete queryObj[el]);
 
-    // 2) Adavanced Filtering
+    // 1B) Adavanced Filtering
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
 
-    const query = Tour.find(JSON.parse(queryStr));
+    let query = Tour.find(JSON.parse(queryStr));
+
+    // 1C) Sorting via chaining
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(',').join(' ');
+      query = query.sort(sortBy);
+    } else {
+      query = query.sort('-createdAt');
+    }
 
     //////// FOR REFERENCE //////////////////////////////
     // advanced query = { difficulty:'easy', duration: { $gte: 5 } }
