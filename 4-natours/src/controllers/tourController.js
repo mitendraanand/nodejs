@@ -5,32 +5,41 @@ const Tour = require('./../models/tourModel');
 // ROUTE HANDLERS
 exports.getAllTours = async (req, res) => {
   try {
-        // BUILD QUERY
+    // BUILD QUERY
+    // 1) Filtering
+    const queryObj = { ...req.query }; // ES 6 trick of creating deep copy of object for modification.
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
 
-        const queryObj = { ...req.query }; // ES 6 trick of creating deep copy of object for modification.
-        const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    excludedFields.forEach(el => delete queryObj[el]);
 
-        excludedFields.forEach(el => delete queryObj[el]);
+    // 2) Adavanced Filtering
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
 
-        const query = Tour.find(queryObj);
-        // const query = await Tour.find()
-        //   .where('duration')
-        //   .equals(5)
-        //   .where('difficulty')
-        //   .equals('easy');
+    const query = Tour.find(JSON.parse(queryStr));
 
-        // EXECUTE QUERY
-        const tours = await query;
+    //////// FOR REFERENCE //////////////////////////////
+    // advanced query = { difficulty:'easy', duration: { $gte: 5 } }
 
-        // SEND RESPONSE
-        res.status(200).json({
-          status: 'success',
-          results: tours.length,
-          data: {
-            tours // From ES6 if key and value name is same then we need write key-value pair.
-          }
-        });
-      } catch (err) {
+    // const query = await Tour.find()
+    //   .where('duration')
+    //   .equals(5)
+    //   .where('difficulty')
+    //   .equals('easy');
+    ////////////////////////////////////////////////////
+
+    // EXECUTE QUERY
+    const tours = await query;
+
+    // SEND RESPONSE
+    res.status(200).json({
+      status: 'success',
+      results: tours.length,
+      data: {
+        tours // From ES6 if key and value name is same then we need write key-value pair.
+      }
+    });
+  } catch (err) {
     res.status(404).json({
       status: 'fail',
       message: err
