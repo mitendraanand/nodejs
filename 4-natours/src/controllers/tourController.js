@@ -5,16 +5,32 @@ const Tour = require('./../models/tourModel');
 // ROUTE HANDLERS
 exports.getAllTours = async (req, res) => {
   try {
-    const tours = await Tour.find();
+        // BUILD QUERY
 
-    res.status(200).json({
-      status: 'success',
-      results: tours.length,
-      data: {
-        tours // From ES6 if key and value name is same then we need write key-value pair.
-      }
-    });
-  } catch (err) {
+        const queryObj = { ...req.query }; // ES 6 trick of creating deep copy of object for modification.
+        const excludedFields = ['page', 'sort', 'limit', 'fields'];
+
+        excludedFields.forEach(el => delete queryObj[el]);
+
+        const query = Tour.find(queryObj);
+        // const query = await Tour.find()
+        //   .where('duration')
+        //   .equals(5)
+        //   .where('difficulty')
+        //   .equals('easy');
+
+        // EXECUTE QUERY
+        const tours = await query;
+
+        // SEND RESPONSE
+        res.status(200).json({
+          status: 'success',
+          results: tours.length,
+          data: {
+            tours // From ES6 if key and value name is same then we need write key-value pair.
+          }
+        });
+      } catch (err) {
     res.status(404).json({
       status: 'fail',
       message: err
