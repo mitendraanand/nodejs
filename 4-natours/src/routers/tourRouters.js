@@ -5,12 +5,14 @@ const tourController = require('./../controllers/tourController');
 
 const router = express.Router(); // A sub App for Tours resources
 
-// router.param('id', tourController.checkID); // Another middle ware to look into parameters and validate.
+router
+  .route('/top-5-cheap')
+  .get(tourController.aliasTopTours, tourController.getAllTours); // Middleware
 
 router
   .route('/')
   .get(tourController.getAllTours)
-  .post(tourController.createTour); 
+  .post(tourController.createTour);
 
 router
   .route('/:id')
