@@ -5,12 +5,12 @@ const tourController = require('./../controllers/tourController');
 
 const router = express.Router(); // A sub App for Tours resources
 
-router.param('id', tourController.checkID); // Another middle ware to look into parameters and validate.
+// router.param('id', tourController.checkID); // Another middle ware to look into parameters and validate.
 
 router
   .route('/')
   .get(tourController.getAllTours)
-  .post(tourController.checkBody, tourController.createTour); // Controller chaining...
+  .post(tourController.createTour); 
 
 router
   .route('/:id')

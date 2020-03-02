@@ -1,7 +1,7 @@
 const fs = require('fs');
 const express = require('express');
 
-const tourController = require('./../controllers/tourController');
+const tourController = require('../controllers/tourController');
 
 const router = express.Router(); // A sub App for Tours resources
 

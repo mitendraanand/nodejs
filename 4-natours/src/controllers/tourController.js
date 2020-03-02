@@ -1,73 +1,63 @@
 const fs = require('fs');
 
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
-);
-
-// MIDDLEWARE to handle the validations of id, if sent
-exports.checkID = (req, res, next, val) => {
-  if (req.params.id * 1 > tours.length) {
-    return res.status(404).json({ status: 'fail', message: 'invalid id' });
-  }
-  next();
-};
-
-// MIDDLEWARE to check the request body for validate data to create tour.
-exports.checkBody = (req, res, next) => {
-  //console.log(`from checkBody: ${JSON.stringify(req.body)}`);
-  if ( !(req.body.name && req.body.price) ) {
-    return res.status(404).json({ status: 'fail', message: 'invalid data' });
-  }
-  next();
-};
+const Tour = require('./../models/tourModel');
 
 // ROUTE HANDLERS
-exports.getAllTours = (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    results: tours.length,
-    requestedTime: req.requestTime,
-    data: {
-      tours // From ES6 if key and value name is same then we need write key-value pair.
-    }
-  });
+exports.getAllTours = async (req, res) => {
+  try {
+    const tours = await Tour.find();
+
+    res.status(200).json({
+      status: 'success',
+      results: tours.length,
+      data: {
+        tours // From ES6 if key and value name is same then we need write key-value pair.
+      }
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err
+    });
+  }
 };
 
-exports.getTour = (req, res) => {
-  console.log(req.params);
+exports.getTour = async (req, res) => {
+  try {
+    const tour = await Tour.findById(req.params.id);
+    // Tour.findOne({_id: req.params.id})
 
-  id = req.params.id * 1; //JS trick to conver string to number
-  // find takes a callback wchich runs the equality check on each element of the array
-  const tour = tours.find(el => el.id === id);
-
-  res.status(200).json({
-    status: 'success',
-    results: 1,
-    data: {
-      tour // From ES6 if key and value name is same then we need write key-value pair.
-    }
-  });
+    res.status(200).json({
+      status: 'success',
+      results: 1,
+      data: {
+        tour // From ES6 if key and value name is same then we need write key-value pair.
+      }
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err
+    });
+  }
 };
 
-exports.createTour = (req, res) => {
-  //console.log(req.body);
-
-  const newId = tours[tours.length - 1].id + 1;
-  const newTour = Object.assign({ id: newId }, req.body); // Did not want to mutate the original body object.
-
-  tours.push(newTour);
-  fs.writeFile(
-    `${__dirname}/../dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    err => {
-      res.status(201).json({
-        status: 'success',
-        data: {
-          tour: newTour
-        }
-      }); // 201 = crated new resource
-    }
-  );
+exports.createTour = async (req, res) => {
+  try {
+    const newTour = await Tour.create(req.body);
+    res.status(201).json({
+      status: 'success',
+      data: {
+        tour: newTour
+      }
+    }); // 201 = crated new resource
+  } catch (err) {
+    console.log(`ERROR: ${err}`);
+    res.status(400).json({
+      status: 'fail',
+      message: 'Invalid data sent!'
+    });
+  }
 };
 
 exports.updateTour = (req, res) => {
