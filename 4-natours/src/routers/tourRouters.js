@@ -10,6 +10,10 @@ router
   .get(tourController.aliasTopTours, tourController.getAllTours); // Middleware
 
 router
+  .route('/tour-stats')
+  .get(tourController.getTourStatus); 
+
+router
   .route('/')
   .get(tourController.getAllTours)
   .post(tourController.createTour);
