@@ -5,7 +5,9 @@ const authController = require('./../controllers/authController');
 
 const router = express.Router(); // A sub App for Users resources
 
+// SPECIAL USER RELATED ROUTES
 router.post('/signup', authController.signup);
+router.post('/login', authController.login);
 
 router
   .route('/')
