@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 ////////// FAT MODEL and THIN CONTROLLER /////////////
 // PUT AS MUCH AS BUSINESS LOGIC AS POSSBILE IN MODEL
@@ -14,6 +15,7 @@ const tourSchema = new mongoose.Schema(
       unique: true,
       trim: true
     },
+    slug: String, 
     duration: {
       type: Number,
       required: [true, 'A tour must have a duration']
@@ -71,6 +73,27 @@ const tourSchema = new mongoose.Schema(
 tourSchema.virtual('durationWeeks').get(function() {
   return this.duration / 7; // arrow function does not get this key word so  regular function.
 });
+
+// PRE DOCUMENT MIDDLEWARE: runs before the .save() command .create() command but not on .insertMany()
+tourSchema.pre('save', function(next) {
+  // A slug is a human-readable, unique identifier, used to identify a resource 
+  // instead of a less human-readable identifier like an id .
+  this.slug = slugify(this.name, {
+    lower: true
+  });
+  next();
+});
+
+// tourSchema.pre('save', function(next) {
+//   console.log('will save document');
+//   next();
+// })
+
+// // POST DOCUMENT MIDDLEWARE
+// tourSchema.post('save', function(doc, next) {
+
+//   next();
+// })
 
 const Tour = mongoose.model('Tour', tourSchema);
 
