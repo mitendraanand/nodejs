@@ -21,6 +21,7 @@ app.use(express.static(`${__dirname}/public`)); // MIDDLEWARE to allow to serve 
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+  
   next();
 });
 
