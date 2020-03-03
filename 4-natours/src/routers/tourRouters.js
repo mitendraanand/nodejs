@@ -7,7 +7,7 @@ const router = express.Router(); // A sub App for Tours resources
 
 router
   .route('/top-5-cheap')
-  .get(tourController.aliasTopTours, tourController.getAllTours); // Middleware
+  .get(tourController.aliasTopTours, tourController.getAllTours); // aliasTopTours is Middleware
 
 router.route('/tour-stats').get(tourController.getTourStatus);
 

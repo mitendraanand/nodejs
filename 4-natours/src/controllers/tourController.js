@@ -2,13 +2,19 @@ const fs = require('fs');
 
 const Tour = require('./../models/tourModel');
 const APIFeatures = require('./../utils/apiFeatures');
+const catchAsync = require('./../utils/catchAsync')
 
+// This is MIDDLEWARE as it has next as parameter.
+// Makes sense to have MIDDLEWARE because all we need is
+// filter before getAllTours.
 exports.aliasTopTours = async (req, res, next) => {
   req.query.limit = '5';
   req.query.sort = '-ratingsAverage,price';
   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
   next();
 };
+
+
 
 // ROUTE HANDLERS
 exports.getAllTours = async (req, res) => {
@@ -69,23 +75,15 @@ exports.getTour = async (req, res) => {
   }
 };
 
-exports.createTour = async (req, res) => {
-  try {
-    const newTour = await Tour.create(req.body);
-    res.status(201).json({
-      status: 'success',
-      data: {
-        tour: newTour
-      }
-    }); // 201 = crated new resource
-  } catch (err) {
-    console.log(`ERROR: ${err}`);
-    res.status(400).json({
-      status: 'fail',
-      message: err
-    });
-  }
-};
+exports.createTour = catchAsync(async (req, res, next) => {
+  const newTour = await Tour.create(req.body);
+  res.status(201).json({
+    status: 'success',
+    data: {
+      tour: newTour
+    }
+  });
+});
 
 exports.updateTour = async (req, res) => {
   try {
@@ -167,7 +165,7 @@ exports.getTourStatus = async (req, res) => {
 
 exports.getMonthlyPlan = async (req, res) => {
   try {
-    const year = req.params.year * 1; 
+    const year = req.params.year * 1;
     const plan = await Tour.aggregate([
       {
         $unwind: '$startDates'
@@ -182,8 +180,8 @@ exports.getMonthlyPlan = async (req, res) => {
       },
       {
         $group: {
-          _id: { $month: '$startDates'},
-          numTourStarts: { $sum: 1},
+          _id: { $month: '$startDates' },
+          numTourStarts: { $sum: 1 },
           tours: { $push: '$name' }
         }
       },
