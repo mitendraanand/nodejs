@@ -1,5 +1,6 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
 
 ////////// FAT MODEL and THIN CONTROLLER /////////////
 // PUT AS MUCH AS BUSINESS LOGIC AS POSSBILE IN MODEL
@@ -31,6 +32,13 @@ const userSchema = new mongoose.Schema(
     passwordConfirm: {
       type: String,
       required: [true, 'A user must have a confirm password'],
+      validate: {
+        // This only works on SAVE!!!
+        validator: function(el) {
+          return el === this.password;
+        },
+        message: 'Passwords are not the same!'
+      }
     }
   },
   {
@@ -38,6 +46,19 @@ const userSchema = new mongoose.Schema(
     toObject: { virtuals: true }
   }
 );
+
+// MIDDLEWARE for Password ENCRYPTION/HASHING if password was modified.
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+
+  // HASH the password with cost of 12
+  this.password = await bcrypt.hash(this.password, 12);
+
+  // Delete the password confirm
+  this.passwordConfirm = undefined;
+
+  next();
+});
 
 const User = mongoose.model('User', userSchema);
 
