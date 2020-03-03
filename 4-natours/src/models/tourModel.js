@@ -15,7 +15,7 @@ const tourSchema = new mongoose.Schema(
       unique: true,
       trim: true
     },
-    slug: String, 
+    slug: String,
     duration: {
       type: Number,
       required: [true, 'A tour must have a duration']
@@ -60,7 +60,11 @@ const tourSchema = new mongoose.Schema(
       default: Date.now(),
       select: false
     },
-    startDates: [Date]
+    startDates: [Date],
+    secretTour: {
+      type: Boolean,
+      default: false
+    }
   },
   {
     toJSON: { virtuals: true },
@@ -76,7 +80,7 @@ tourSchema.virtual('durationWeeks').get(function() {
 
 // PRE DOCUMENT MIDDLEWARE: runs before the .save() command .create() command but not on .insertMany()
 tourSchema.pre('save', function(next) {
-  // A slug is a human-readable, unique identifier, used to identify a resource 
+  // A slug is a human-readable, unique identifier, used to identify a resource
   // instead of a less human-readable identifier like an id .
   this.slug = slugify(this.name, {
     lower: true
@@ -94,6 +98,20 @@ tourSchema.pre('save', function(next) {
 
 //   next();
 // })
+
+// QUERY MIDDLEWARE: will be called before quey related methods like .find()
+// This middleware is to only find non secret tours when there is find() call.
+// RegEx: all the strings that start with find.
+tourSchema.pre(/^find/, function(next) {
+  this.find({ secretTour: { $ne: true } });
+  this.start = Date.now();
+  next();
+});
+
+tourSchema.post(/^find/, function(docs, next) {
+  console.log(`Query took ${Date.now() - this.start} milliseconds!`);
+  next();
+});
 
 const Tour = mongoose.model('Tour', tourSchema);
 
