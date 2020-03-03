@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const validator = require('validator');
 
 ////////// FAT MODEL and THIN CONTROLLER /////////////
 // PUT AS MUCH AS BUSINESS LOGIC AS POSSBILE IN MODEL
@@ -15,7 +16,8 @@ const tourSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       maxlength: [40, 'A tour name must have less or equal 40 chars'],
-      minlength: [10, 'A tour name must have more or equal 10 chars']
+      minlength: [10, 'A tour name must have more or equal 10 chars'],
+      //validate: [validator.isAlpha, 'A tour name must only contain characters']
     },
     slug: String,
     duration: {
@@ -48,7 +50,17 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'A tour must have a price']
     },
-    discount: Number,
+    discount: {
+      type: Number,
+      validate: {
+        validator: function(val) {
+          // this only points to current doc on NEW document creation
+          // so it won't work for update.
+          return val < this.price;
+        },
+        message: 'Discount {{VALUE}} should be below price.'
+      }
+    },
     summary: {
       type: String,
       trim: true,
