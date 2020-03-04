@@ -23,7 +23,8 @@ exports.signup = catchAsync(async (req, res, next) => {
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
-    passwordConfirm: req.body.passwordConfirm
+    passwordConfirm: req.body.passwordConfirm,
+    role: req.body.role
   });
 
   // CREATE TOKEN
@@ -101,3 +102,21 @@ exports.protect = catchAsync(async (req, res, next) => {
   req.user = currentUser;
   next();
 });
+
+// Passing parameters to MIDDLEWARE is tricky as it takes only req, res and next.
+// We will write a wrapper function which takes roles array(ES6 Rest Syntax: ...roles)
+// then returns the MIDDLEWARE. This MIDDELWARE will be able to access roles array
+// as it's a clousure which can access it's parent function scope members.
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    // roles = ['admin', 'lead-guy']
+    if (!roles.includes(req.user.role)) {
+      // Remember that protect() MIDDLEWARE is called before 'restrictTo'
+      // and puts the logged in user into 'req' object.
+      return next(
+        new AppError('You do not have permission to perform this actions', 403)
+      );
+    }
+    next();
+  };
+};
