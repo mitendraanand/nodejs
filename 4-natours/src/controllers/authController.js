@@ -1,4 +1,5 @@
 const { promisify } = require('util');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
@@ -141,7 +142,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   // 3. Send it to user's email
   const resetURL = `${req.protocol}://${req.get(
     'host'
-  )}/api/v1/users/resetPassword/${resetToken}}`;
+  )}/api/v1/users/resetPassword/${resetToken}`;
 
   const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}. \nIf you didn't forget your password, please ignore this.`;
 
@@ -161,8 +162,47 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     user.passswordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
 
-    return next(new AppError('There was an error while sending email, please try again', 500))
+    return next(
+      new AppError(
+        'There was an error while sending email, please try again',
+        500
+      )
+    );
   }
 });
 
-exports.resetPassword = (req, res, next) => {};
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  // 1. Get user based on token and get the encrypted/hashed version
+  // as user will send the plain text token.
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() }
+  });
+
+  // 2. if token has not expired and there is a user, set the new password.
+  if (!user) {
+    return next(new AppError('Token is invalid or has expired.', 400));
+  }
+
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.passswordResetToken = undefined;
+  user.passswordResetExpires = undefined;
+
+  await user.save(); // we need the validation so not disabling it.
+
+  // 3. Update the changedPasswordAt property for the user.
+
+  // 4. Log the user, send JWT
+  const token = signToken(user._id);
+
+  res.status(200).json({
+    status: 'success',
+    token
+  });
+});

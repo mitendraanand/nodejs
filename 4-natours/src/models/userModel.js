@@ -70,6 +70,16 @@ userSchema.pre('save', async function(next) {
   next();
 });
 
+// MIDDLEWARE to store the password change timestamp
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password') || this.isNew) {
+    return next();
+  }
+
+  this.passwordChangedAt = Date.now() - 1000; // Some time DB save takes longer than JWT token generations so offsetting a bit.
+  next();
+});
+
 // This is how you create instance method by using classname.method.
 // THis is done because login will have concrete user from db for password validation.
 userSchema.methods.correctPassword = async function(
@@ -102,9 +112,11 @@ userSchema.methods.createPasswordResetToken = function() {
     .update(resetToken)
     .digest('hex');
 
-  console.log({ resetToken }, this.passwordResetToken); // ES6 way of logging name and val both by: { resetToken }
-
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+  console.log(
+    `resetToken: ${resetToken} hashedToken: ${this.passwordResetToken} passwordResetExpires: ${this.passwordResetExpires}`
+  );
 
   // We will send the plain text to user's email for password reset.
   // Encrypted one will remain in db for validation, similar to how
