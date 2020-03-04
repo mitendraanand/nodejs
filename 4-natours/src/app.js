@@ -1,6 +1,8 @@
 const fs = require('fs');
 const express = require('express');
 const morgan = require('morgan');
+const reteLimit = require('express-rate-limit');
+const helmet = require('helmet');
 
 const appError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -9,19 +11,35 @@ const userRouter = require('./routers/userRouters');
 
 const app = express();
 
-// MIDDLEWARES
+// GLOBAL MIDDLEWARES
+// middleware to set Security.HTTP headers
+// e.g. dnsPrefetchControl, frameguard etc.
+app.use(helmet());
+
 // Include a simple middleware so that POST request object has the data from client.
 // Middleware is just a function that modify the incoming data
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev')); // Logs info about HTTP requests e.g. GET /api/v1/tours/10 200 8.949 ms - 111
 }
 
-app.use(express.json());
-app.use(express.static(`${__dirname}/public`)); // MIDDLEWARE to allow to serve static html/img/etc files.
+// RateLimit middleware to limit how many request can come from one IP per hour.
+const limiter = reteLimit({
+  max: 100,
+  windowM: 60 * 60 * 1000,
+  message: 'Too many requests from this IP, please try again in an hour!'
+});
+app.use('/api', limiter);
+
+
+// Body parser, reading data from body into req.body
+app.use(express.json({ limit: '10kb'})); // body larger than 10 Kilo Byte is not accepted. Security!!!
+
+// MIDDLEWARE to allow to serve static html/img/etc files.
+app.use(express.static(`${__dirname}/public`)); 
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  
+
   next();
 });
 
