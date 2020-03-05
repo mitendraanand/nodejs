@@ -3,6 +3,9 @@ const express = require('express');
 const morgan = require('morgan');
 const reteLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
 
 const appError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -30,12 +33,32 @@ const limiter = reteLimit({
 });
 app.use('/api', limiter);
 
-
 // Body parser, reading data from body into req.body
-app.use(express.json({ limit: '10kb'})); // body larger than 10 Kilo Byte is not accepted. Security!!!
+app.use(express.json({ limit: '10kb' })); // body larger than 10 Kilo Byte is not accepted. Security!!!
+
+// MIDDLEWARE for Data Sanitization against NoSQL query injection
+// mongoSanitize() will remove all '$' and '.' from the body.
+// this will help the situation when {"$gt": ""} as email was able
+// to pull users for any easily guessable password in the system
+app.use(mongoSanitize());
+
+// MIDDLEWARE for Data Sanitization again Cross Site Scripting(XSS)
+// Cleans any user input from malasciouse html
+app.use(xss());
+
+// MIDDLEWARE for HTTP Parameter Polution
+// e.g. {{URL}}/api/v1/tours?sort=duration&sort=price
+// sorting twice breaks the API
+// But this breaks sort=duration5&duration=7
+// So we can whitelist 'duration'
+app.use(
+  hpp({
+    whitelist: ['duration', 'ratingAverage', '']
+  })
+);
 
 // MIDDLEWARE to allow to serve static html/img/etc files.
-app.use(express.static(`${__dirname}/public`)); 
+app.use(express.static(`${__dirname}/public`));
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
